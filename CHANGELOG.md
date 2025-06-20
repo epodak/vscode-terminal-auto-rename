@@ -1,24 +1,35 @@
 # Change Log
 
-All notable changes to the "terminal-auto-rename" extension will be documented in this file.
+epodak维护版本的更新日志。
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+所有重要变更都将记录在此文件中。
 
-## [Unreleased]
+格式基于 [Keep a Changelog](http://keepachangelog.com/)。
 
-### Fixed
-- 修复终端重命名逻辑：现在优先使用终端的实际工作目录而不是工作区根目录
-- 现在在子目录中打开终端时，终端名称会正确显示为子目录名称（如"中文名"、"english"）而不是工作区根目录名称
+## [1.0.0] - 2024-12-19
 
-### Added
-- 新增路径策略配置选项 `terminal-auto-rename.pathStrategy`，支持三种策略：
-  - `terminal`（默认）：优先使用终端实际工作目录
-  - `workspace`：优先使用工作区根目录  
-  - `editor`：优先使用活动编辑器所在目录
-- 改进调试日志，显示所使用的路径策略和路径来源
+### 新的开始
+- 🎉 项目由 epodak 接手维护
+- 🔄 版本重新开始计数
 
-### Changed
-- 路径获取优先级调整：终端工作目录 > 活动编辑器目录 > 工作区文件夹 > process.cwd()
-- 函数 `renameWithDirName` 现在接受可选的终端参数，以支持特定终端的重命名
+### 功能特性
+- ✅ 智能终端重命名：自动使用文件夹名称重命名终端
+- ✅ 中文支持：完美支持中文文件夹名称显示
+- ✅ 多路径策略：支持 terminal、workspace、editor 三种策略
+- ✅ 实时重命名：打开新终端或切换终端时自动重命名
+- ✅ 调试系统：提供详细的调试日志和分类
 
-## [0.0.1] - Initial release
+### 配置选项
+- `terminal-auto-rename.pathStrategy` - 路径获取策略配置
+- `terminal-auto-rename.debugLevel` - 调试日志级别
+- `terminal-auto-rename.debugCategories` - 调试日志类别
+
+### 开发工具
+- ✅ 便捷的构建脚本 (build.sh)
+- ✅ VS Code 扩展工具函数 (vscode-ext-utils.sh)
+- ✅ 支持快速打包和版本管理
+
+### 技术细节
+- 路径获取优先级：终端工作目录 > 活动编辑器目录 > 工作区文件夹 > process.cwd()
+- 支持 VS Code 1.54.0+ 版本
+- 兼容 Windows、macOS、Linux

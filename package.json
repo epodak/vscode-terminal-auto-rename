@@ -2,7 +2,7 @@
 	"name": "terminal-auto-rename",
 	"displayName": "Terminal Auto Rename",
 	"description": "Automatically renames the terminal with the current folder name.",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"publisher": "epodak",
 	"author": "epodak",
 	"repository": {
@@ -29,7 +29,7 @@
 		"中文"
 	],
 	"activationEvents": [
-		"*"
+		"onStartupFinished"
 	],
 	"main": "./extension.js",
 	"contributes": {
@@ -63,7 +63,7 @@
 					"default": "INFO",
 					"enum": [
 						"ERROR",
-						"WARN", 
+						"WARN",
 						"INFO",
 						"DEBUG",
 						"TRACE"
@@ -72,13 +72,15 @@
 				},
 				"terminal-auto-rename.debugCategories": {
 					"type": "array",
-					"default": ["ALL"],
+					"default": [
+						"ALL"
+					],
 					"items": {
 						"type": "string",
 						"enum": [
 							"ALL",
 							"STARTUP",
-							"RENAME", 
+							"RENAME",
 							"TERMINAL",
 							"WORKSPACE",
 							"EDITOR",
