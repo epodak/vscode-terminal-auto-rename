@@ -2,7 +2,7 @@
 	"name": "terminal-auto-rename",
 	"displayName": "Terminal Auto Rename",
 	"description": "Automatically renames the terminal with the current folder name.",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "batatop",
 	"repository": {
 		"type": "git",
@@ -18,6 +18,80 @@
 		"*"
 	],
 	"main": "./extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "terminal-auto-rename.debug",
+				"title": "Debug Terminal Rename"
+			},
+			{
+				"command": "terminal-auto-rename.testTerminal",
+				"title": "Test Terminal Events"
+			},
+			{
+				"command": "terminal-auto-rename.showFilter",
+				"title": "Show Filter Tip"
+			},
+			{
+				"command": "terminal-auto-rename.setLogLevel",
+				"title": "Set Debug Log Level"
+			},
+			{
+				"command": "terminal-auto-rename.setCategories",
+				"title": "Set Debug Categories"
+			}
+		],
+		"configuration": {
+			"title": "Terminal Auto Rename",
+			"properties": {
+				"terminal-auto-rename.debugLevel": {
+					"type": "string",
+					"default": "INFO",
+					"enum": [
+						"ERROR",
+						"WARN", 
+						"INFO",
+						"DEBUG",
+						"TRACE"
+					],
+					"description": "调试日志级别 (ERROR < WARN < INFO < DEBUG < TRACE)"
+				},
+				"terminal-auto-rename.debugCategories": {
+					"type": "array",
+					"default": ["ALL"],
+					"items": {
+						"type": "string",
+						"enum": [
+							"ALL",
+							"STARTUP",
+							"RENAME", 
+							"TERMINAL",
+							"WORKSPACE",
+							"EDITOR",
+							"ENV",
+							"CONFIG"
+						]
+					},
+					"description": "要显示的调试日志类别"
+				},
+				"terminal-auto-rename.pathStrategy": {
+					"type": "string",
+					"default": "terminal",
+					"enum": [
+						"terminal",
+						"workspace",
+						"editor"
+					],
+					"enumDescriptions": [
+						"优先使用终端的实际工作目录",
+						"优先使用工作区根目录",
+						"优先使用活动编辑器所在目录"
+					],
+					"description": "终端重命名的路径获取策略"
+				}
+			}
+		}
+	},
 	"scripts": {
 		"lint": "eslint .",
 		"pretest": "yarn run lint",
@@ -34,7 +108,6 @@
 		"typescript": "^4.3.2",
 		"vscode-test": "^1.5.2"
 	},
-	"dependencies": {
-		"pid-cwd": "^1.2.0"
-	}
+	"dependencies": {},
+	"packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

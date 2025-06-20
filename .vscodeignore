@@ -7,3 +7,9 @@ vsc-extension-quickstart.md
 **/jsconfig.json
 **/*.map
 **/.eslintrc.json
+build.sh
+vscode-ext-utils.sh
+USAGE.md
+node_modules/**
+yarn.lock
+package-lock.json
