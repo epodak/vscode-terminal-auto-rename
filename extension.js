@@ -117,7 +117,7 @@ function activate() {
 			
 			// 获取路径策略配置
 			const config = vscode.workspace.getConfiguration('terminal-auto-rename');
-			const pathStrategy = config.get('pathStrategy', 'workspace');
+			const pathStrategy = config.get('pathStrategy', 'terminal');
 			logger.debug('CONFIG', '使用路径策略', { strategy: pathStrategy });
 			
 			// 根据策略选择路径获取方法

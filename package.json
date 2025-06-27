@@ -2,7 +2,7 @@
 	"name": "terminal-auto-rename",
 	"displayName": "Terminal Auto Rename",
 	"description": "Automatically renames the terminal with the current folder name.",
-	"version": "1.0.4",
+	"version": "1.0.6",
 	"publisher": "epodak",
 	"author": "epodak",
 	"repository": {
@@ -92,7 +92,7 @@
 				},
 				"terminal-auto-rename.pathStrategy": {
 					"type": "string",
-					"default": "workspace",
+					"default": "terminal",
 					"enum": [
 						"terminal",
 						"workspace",
