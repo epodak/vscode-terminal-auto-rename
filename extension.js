@@ -87,6 +87,54 @@ class DebugLogger {
 
 const logger = new DebugLogger();
 
+// 实验性功能：通过发送命令获取终端当前工作目录
+async function getTerminalCurrentPath(terminal) {
+	return new Promise((resolve) => {
+		logger.debug('PWD', '尝试获取终端当前路径');
+		
+		// 设置超时，避免无限等待
+		const timeout = setTimeout(() => {
+			logger.warn('PWD', '获取终端路径超时');
+			resolve(null);
+		}, 2000);
+		
+		// 监听终端输出
+		const disposable = vscode.window.onDidWriteTerminalData((e) => {
+			if (e.terminal === terminal) {
+				const output = e.data;
+				logger.trace('PWD', '终端输出', { output });
+				
+				// 查找路径模式（Windows和Unix）
+				// Windows: C:\path\to\dir 或 D:\path\to\dir
+				// Unix: /path/to/dir
+				const windowsPathMatch = output.match(/[A-Z]:\\[^\s\r\n]+/g);
+				const unixPathMatch = output.match(/\/[^\s\r\n]+/g);
+				
+				let detectedPath = null;
+				if (windowsPathMatch && windowsPathMatch.length > 0) {
+					detectedPath = windowsPathMatch[windowsPathMatch.length - 1];
+					logger.debug('PWD', '检测到Windows路径', { path: detectedPath });
+				} else if (unixPathMatch && unixPathMatch.length > 0) {
+					detectedPath = unixPathMatch[unixPathMatch.length - 1];
+					logger.debug('PWD', '检测到Unix路径', { path: detectedPath });
+				}
+				
+				if (detectedPath) {
+					clearTimeout(timeout);
+					disposable.dispose();
+					logger.info('PWD', '成功获取终端当前路径', { path: detectedPath });
+					resolve(detectedPath);
+				}
+			}
+		});
+		
+		// 发送pwd命令（兼容Windows和Unix）
+		const pwdCommand = process.platform === 'win32' ? 'cd\r' : 'pwd\r';
+		logger.debug('PWD', '发送命令', { command: pwdCommand.trim() });
+		terminal.sendText(pwdCommand, false);
+	});
+}
+
 function activate() {
 	// 显示筛选提示
 	logger.showFilterTip();
@@ -118,17 +166,30 @@ function activate() {
 			// 获取路径策略配置
 			const config = vscode.workspace.getConfiguration('terminal-auto-rename');
 			const pathStrategy = config.get('pathStrategy', 'terminal');
-			logger.debug('CONFIG', '使用路径策略', { strategy: pathStrategy });
+			const enablePwdDetection = config.get('enablePwdDetection', false);
+			logger.debug('CONFIG', '使用路径策略', { strategy: pathStrategy, pwdDetection: enablePwdDetection });
 			
 			// 根据策略选择路径获取方法
 			const pathMethods = [];
 			
 			if (pathStrategy === 'terminal') {
-				pathMethods.push('terminal', 'workspace', 'editor', 'process');
+				if (enablePwdDetection) {
+					pathMethods.push('pwd', 'terminal', 'workspace', 'editor', 'process');
+				} else {
+					pathMethods.push('terminal', 'workspace', 'editor', 'process');
+				}
 			} else if (pathStrategy === 'workspace') {
-				pathMethods.push('workspace', 'editor', 'terminal', 'process');
+				if (enablePwdDetection) {
+					pathMethods.push('workspace', 'editor', 'pwd', 'terminal', 'process');
+				} else {
+					pathMethods.push('workspace', 'editor', 'terminal', 'process');
+				}
 			} else if (pathStrategy === 'editor') {
-				pathMethods.push('editor', 'terminal', 'workspace', 'process');
+				if (enablePwdDetection) {
+					pathMethods.push('editor', 'pwd', 'terminal', 'workspace', 'process');
+				} else {
+					pathMethods.push('editor', 'terminal', 'workspace', 'process');
+				}
 			}
 			
 			// 按策略顺序尝试获取路径
@@ -136,6 +197,20 @@ function activate() {
 				if (targetPath) break;
 				
 				switch (method) {
+					case 'pwd':
+						// 实验性：通过发送命令获取终端当前路径
+						try {
+							const pwdPath = await getTerminalCurrentPath(activeTerminal);
+							if (pwdPath) {
+								targetPath = pwdPath;
+								pathSource = '终端当前路径(pwd)';
+								logger.debug('PWD', '使用pwd获取的路径', { path: targetPath });
+							}
+						} catch (error) {
+							logger.warn('PWD', '通过pwd获取路径失败', { error: error.message });
+						}
+						break;
+						
 					case 'terminal':
 						// 使用终端的创建选项中的 cwd（实际工作目录）
 						if (activeTerminal.creationOptions && activeTerminal.creationOptions.cwd) {
@@ -361,6 +436,34 @@ function activate() {
 			logger.info('CONFIG', `调试类别已设置为: ${selected.join(', ')}`);
 		}
 	});
+	
+	// 注册PWD检测测试命令
+	const testPwdCommand = vscode.commands.registerCommand('terminal-auto-rename.testPwd', async () => {
+		logger.info('PWD-TEST', 'PWD检测测试开始');
+		
+		const activeTerminal = vscode.window.activeTerminal;
+		if (!activeTerminal) {
+			logger.error('PWD-TEST', '没有活动终端，请先打开一个终端');
+			vscode.window.showErrorMessage('没有活动终端，请先打开一个终端');
+			return;
+		}
+		
+		logger.info('PWD-TEST', '开始测试PWD检测', { terminalName: activeTerminal.name });
+		
+		try {
+			const detectedPath = await getTerminalCurrentPath(activeTerminal);
+			if (detectedPath) {
+				logger.info('PWD-TEST', 'PWD检测成功', { path: detectedPath });
+				vscode.window.showInformationMessage(`PWD检测成功: ${detectedPath}`);
+			} else {
+				logger.warn('PWD-TEST', 'PWD检测失败：未获取到路径');
+				vscode.window.showWarningMessage('PWD检测失败：未获取到路径');
+			}
+		} catch (error) {
+			logger.error('PWD-TEST', 'PWD检测异常', { error: error.message });
+			vscode.window.showErrorMessage(`PWD检测异常: ${error.message}`);
+		}
+	});
 
 	logger.debug('STARTUP', '命令注册完成');
 
@@ -401,6 +504,7 @@ function activate() {
 			showFilterCommand.dispose();
 			setLogLevelCommand.dispose();
 			setCategoriesCommand.dispose();
+			testPwdCommand.dispose();
 			logger.info('STARTUP', '扩展已释放');
 		}
 	};

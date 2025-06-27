@@ -2,7 +2,7 @@
 	"name": "terminal-auto-rename",
 	"displayName": "Terminal Auto Rename",
 	"description": "Automatically renames the terminal with the current folder name.",
-	"version": "1.0.6",
+	"version": "1.0.7",
 	"publisher": "epodak",
 	"author": "epodak",
 	"repository": {
@@ -53,6 +53,10 @@
 			{
 				"command": "terminal-auto-rename.setCategories",
 				"title": "Set Debug Categories"
+			},
+			{
+				"command": "terminal-auto-rename.testPwd",
+				"title": "Test PWD Detection"
 			}
 		],
 		"configuration": {
@@ -104,6 +108,11 @@
 						"优先使用活动编辑器所在目录"
 					],
 					"description": "终端重命名的路径获取策略"
+				},
+				"terminal-auto-rename.enablePwdDetection": {
+					"type": "boolean",
+					"default": false,
+					"description": "启用实验性PWD检测功能（会向终端发送命令获取当前路径）"
 				}
 			}
 		}
